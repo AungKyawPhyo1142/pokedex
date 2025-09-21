@@ -307,6 +307,22 @@ func commandInspect(c *config, args []string) error {
 	return nil
 }
 
+func commandPokedex(c *config, args []string) error {
+
+	if len(c.pokedex) == 0 {
+		fmt.Println("Your pokedex is empty!")
+		return nil
+	}
+
+	fmt.Println("Your Pokedex:")
+	for _, pokemon := range c.pokedex {
+		fmt.Printf(" - %s\n", pokemon.Name)
+	}
+
+	return nil
+
+}
+
 func main() {
 	cfg := &config{
 		nextURL: nil,
@@ -350,6 +366,11 @@ func main() {
 			name:        "inspect",
 			description: "View details of a caught pokemon",
 			callback:    commandInspect,
+		},
+		"pokedex": {
+			name:        "pokedex",
+			description: "View all caught pokemon",
+			callback:    commandPokedex,
 		},
 	}
 
