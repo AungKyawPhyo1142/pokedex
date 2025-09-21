@@ -47,10 +47,31 @@ type LocationAreaDetails struct {
 	} `json:"pokemon_encounters"`
 }
 
+type Stat struct {
+	BaseStat int `json:"base_stat"`
+	Effort   int `json:"effort"`
+	Stat     struct {
+		Name string `json:"name"`
+		URL  string `json:"url"`
+	} `json:"stat"`
+}
+
+type Type struct {
+	Slot int `json:"slot"`
+	Type struct {
+		Name string `json:"name"`
+		URL  string `json:"url"`
+	} `json:"type"`
+}
+
 type PokemonInfo struct {
 	Name           string `json:"name"`
 	ID             int    `json:"id"`
 	BaseExperience int    `json:"base_experience"`
+	Height         int    `json:"height"`
+	Weight         int    `json:"weight"`
+	Stats          []Stat `json:"stats"`
+	Types          []Type `json:"types"`
 }
 
 func (c *config) fetchLocationArea(url string) (LocationAreaResponse, error) {
@@ -257,6 +278,35 @@ func commandCatch(c *config, args []string) error {
 
 }
 
+func commandInspect(c *config, args []string) error {
+
+	if len(args) != 1 {
+		return fmt.Errorf("you must provide a pokemon name")
+	}
+
+	pokemonName := args[0]
+	pokemon, ok := c.pokedex[pokemonName]
+	if !ok {
+		return fmt.Errorf("you have not caught %s yet", pokemonName)
+	}
+
+	fmt.Printf("Name: %s\n", pokemon.Name)
+	fmt.Printf("ID: %d\n", pokemon.ID)
+	fmt.Printf("Base Experience: %d\n", pokemon.BaseExperience)
+	fmt.Printf("Height: %d\n", pokemon.Height)
+	fmt.Printf("Weight: %d\n", pokemon.Weight)
+	fmt.Println("Stats:")
+	for _, stat := range pokemon.Stats {
+		fmt.Printf(" - %s: %d\n", stat.Stat.Name, stat.BaseStat)
+	}
+	fmt.Println("Types:")
+	for _, typ := range pokemon.Types {
+		fmt.Printf(" - %s\n", typ.Type.Name)
+	}
+
+	return nil
+}
+
 func main() {
 	cfg := &config{
 		nextURL: nil,
@@ -295,6 +345,11 @@ func main() {
 			name:        "catch",
 			description: "Attempt to catch a pokemon and add it to your pokedex",
 			callback:    commandCatch,
+		},
+		"inspect": {
+			name:        "inspect",
+			description: "View details of a caught pokemon",
+			callback:    commandInspect,
 		},
 	}
 
